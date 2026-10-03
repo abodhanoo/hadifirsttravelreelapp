@@ -1,0 +1,47 @@
+name: Build Android APK
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    env:
+      CI: "1"
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract project source
+        working-directory: .
+        run: unzip -o travel-reels-source.zip -d .
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: android-actions/setup-android@v3
+
+      - name: Install packages
+        run: |
+          npm install
+          npx expo install --fix
+
+      - name: Generate the Android project
+        run: npx expo prebuild --platform android --clean
+
+      - name: Build the APK
+        run: cd android && ./gradlew assembleRelease --no-daemon
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: travel-reels-apk
+          path: app/android/app/build/outputs/apk/release/app-release.apk
+          if-no-files-found: error
