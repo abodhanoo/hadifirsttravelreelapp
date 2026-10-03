@@ -16,7 +16,8 @@ jobs:
 
       - name: Extract project source
         working-directory: .
-        run: unzip -o travel-reels-source.zip -d .
+        run: |
+          unzip -o travel-reels-source.zip -d . || [ "$?" -eq 1 ]
 
       - uses: actions/setup-node@v4
         with:
